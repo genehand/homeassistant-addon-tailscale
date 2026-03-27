@@ -14,6 +14,19 @@ declare curl_result
 
 declare -a options
 
+# Determine Home Assistant IP and port for sharing
+declare ha_ip="127.0.0.1"
+if bashio::config.has_value 'share_homeassistant_ip'; then
+  ha_ip=$(bashio::config 'share_homeassistant_ip')
+fi
+
+declare ha_port
+if bashio::config.has_value 'share_homeassistant_port'; then
+  ha_port=$(bashio::config 'share_homeassistant_port')
+else
+  ha_port=$(bashio::core.port)
+fi
+
 # Validate share_homeassistant value
 if ! bashio::config.equals 'share_homeassistant' 'serve' && \
   ! bashio::config.equals 'share_homeassistant' 'funnel'
@@ -34,7 +47,7 @@ if bashio::var.true "$(bashio::core.ssl)"; then
 fi
 
 # Wait a bit for HA to be available during startup
-while (( 200 != (curl_result=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:$(bashio::core.port)")) )); do
+while (( 200 != (curl_result=$(curl -s -o /dev/null -w "%{http_code}" "http://${ha_ip}:${ha_port}")) )); do
   if (( wait_counter++ == WAIT_COUNT )); then
     break
   fi
@@ -52,7 +65,7 @@ if (( 200 != curl_result )); then
   bashio::log.warning "Home Assistant is not accessible currently, unable to test the connection to Home Assistant as reverse proxy"
 else
   # Test Home Assistant's HTTP reverse proxy configuration
-  if (( 200 != $(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:$(bashio::core.port)" -H "X-Forwarded-For: 127.0.0.1") )); then
+  if (( 200 != $(curl -s -o /dev/null -w "%{http_code}" "http://${ha_ip}:${ha_port}" -H "X-Forwarded-For: 127.0.0.1") )); then
     bashio::exit.nok \
       "Unable to connect to Home Assistant as reverse proxy." \
       "Please check your configuration based on the app's documentation under \"Option: share_homeassistant\"."
@@ -77,11 +90,7 @@ fi
 options+=(--bg=false)
 options+=(--https="$(bashio::config 'share_on_port')")
 options+=(--set-path=/)
-if bashio::config.has_value 'share_homeassistant_port'; then
-  options+=(http://127.0.0.1:"$(bashio::config 'share_homeassistant_port')")
-else
-  options+=(http://127.0.0.1:"$(bashio::core.port)")
-fi
+options+=(http://${ha_ip}:${ha_port})
 
 # This service can wait for HA for minutes, let notify S6 when we are really starting
 echo "" >&3
