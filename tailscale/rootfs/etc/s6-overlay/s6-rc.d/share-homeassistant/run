@@ -77,7 +77,11 @@ fi
 options+=(--bg=false)
 options+=(--https="$(bashio::config 'share_on_port')")
 options+=(--set-path=/)
-options+=(http://127.0.0.1:"$(bashio::core.port)")
+if bashio::config.has_value 'share_homeassistant_port'; then
+  options+=(http://127.0.0.1:"$(bashio::config 'share_homeassistant_port')")
+else
+  options+=(http://127.0.0.1:"$(bashio::core.port)")
+fi
 
 # This service can wait for HA for minutes, let notify S6 when we are really starting
 echo "" >&3
