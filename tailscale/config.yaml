@@ -90,6 +90,8 @@ schema:
   log_upload: bool
   login_server: url
   share_homeassistant: list(disabled|serve|funnel)
+  share_homeassistant_ip: str?
+  share_homeassistant_port: port?
   share_on_port: match(^(?:443|8443|10000)$)
   services:
     - name: "match(^svc:[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?$)"
