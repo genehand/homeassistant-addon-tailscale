@@ -66,6 +66,16 @@ configuration:
       your Home Assistant instance with a valid certificate on your tailnet or on the
       internet.
       This option is disabled by default.
+  share_homeassistant_ip:
+    name: Share Home Assistant IP address
+    description: >-
+      This option allows you to specify the IP address of the Home Assistant instance
+      to share. By default, it uses 127.0.0.1 (localhost).
+  share_homeassistant_port:
+    name: Share Home Assistant port
+    description: >-
+      This option allows you to specify the port of the Home Assistant instance
+      to share. By default, it uses the core port configured in Home Assistant.
   share_on_port:
     name: Share on port
     description: >-
